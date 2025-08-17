@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resume Analyzer</title>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  text-align: center;
+  z-index: 1;
+}
+h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+input,
+textarea{
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+
+/* Fullscreen horizontal result screen */
+.result-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 97vw;
+  height: 90vh;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  padding: 30px;
+  overflow-y: auto;
+  z-index: 10;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.result-screen.active {
+  display: flex;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.close-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  width: auto;
+}
+.close-btn:hover {
+  background: darkred;
+}
+.result-content {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+.highlight {
+  background: #e6f2ff;
+  border-left: 4px solid #007bff;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+}
+
+/* === Custom Formatting for Sections === */
+.section-heading {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  margin: 15px 0 8px;
+  color: #222;
+}
+.section-text {
+  font-size: 15px;
+  text-align: left;
+  color: #333;
+  line-height: 1.6;
+}
+.match-score {
+  font-size: 28px;
+  font-weight: bold;
+  color: green;
+  text-align: center;
+  margin: 20px 0;
+}
+
+
+/* From Uiverse.io by vamsidevendrakumar */ 
+.card {
+  width: 50vw;
+  height: 60vh;
+  perspective: 1000px;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.999s;
+}
+
+.card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-front {
+  background-color: #6A2C70;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  border: 10px solid #6A2C70;
+  border-radius: 30px;
+  justify-content: center;
+  font-size: 24px;
+  transform: rotateY(0deg);
+}
+
+.card-back {
+  background-color: skyblue;
+  color: black;
+  display: flex;
+  align-items: center;
+  border: 10px solid skyblue;
+  border-radius: 10px;
+  justify-content: center;
+  padding: 0 20px 0px 20px ;
+  font-family: cursive;
+  transform: rotateY(180deg);
+}
+
+/* From Uiverse.io by njesenberger */ 
+.button {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  border-width: 0;
+  padding: 0 8px 12px;
+  min-width: 10em;
+  box-sizing: border-box;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.button-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 0;
+  padding: 8px 16px;
+  transform: translateY(0);
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 -1px rgba(0, 0, 0, .25);
+  transition-property: transform;
+  transition-duration: .2s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.button:active .button-top {
+  transform: translateY(6px);
+}
+
+.button-top::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  box-sizing: content-box;
+  background-image: radial-gradient(#cd3f64, #9d3656);
+  text-align: center;
+  color: #fff;
+  box-shadow: inset 0 0 0px 1px rgba(255, 255, 255, .2), 0 1px 2px 1px rgba(255, 255, 255, .2);
+  transition-property: border-radius, padding, width, transform;
+  transition-duration: .2s;
+}
+
+.button:active .button-top::after {
+  border-radius: 6px;
+  padding: 0 2px;
+}
+
+.button-bottom {
+  position: absolute;
+  z-index: -1;
+  bottom: 4px;
+  left: 4px;
+  border-radius: 8px / 16px 16px 8px 8px;
+  padding-top: 6px;
+  width: calc(100% - 8px);
+  height: calc(100% - 10px);
+  box-sizing: content-box;
+  background-color: #803;
+  background-image: radial-gradient(4px 8px at 4px calc(100% - 8px), rgba(255, 255, 255, .25), transparent), radial-gradient(4px 8px at calc(100% - 4px) calc(100% - 8px), rgba(255, 255, 255, .25), transparent), radial-gradient(16px at -4px 0, white, transparent), radial-gradient(16px at calc(100% + 4px) 0, white, transparent);
+  box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.5), inset 0 -1px 3px 3px rgba(0, 0, 0, .4);
+  transition-property: border-radius, padding-top;
+  transition-duration: .2s;
+}
+
+.button:active .button-bottom {
+  border-radius: 10px 10px 8px 8px / 8px;
+  padding-top: 0;
+}
+
+.button-base {
+  position: absolute;
+  z-index: -2;
+  top: 4px;
+  left: 0;
+  border-radius: 12px;
+  width: 100%;
+  height: calc(100% - 4px);
+  background-color: rgba(0, 0, 0, .15);
+  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, .75), inset 0 2px 2px rgba(0, 0, 0, .25);
+}
+.border_n {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+  </style>
+</head>
+<body>
+  <!-- From Uiverse.io by vamsidevendrakumar --> 
+<div class="card">
+  <div class="card-inner">
+    <div class="card-front">
+    <h1 id="resumeAnalyzerTitle">Resume Analyzer</h1>
+    </div>
+    <div class="card-back">
+      <form id="resumeForm">
+      <label for="resume">Uplode Resume (PDF)</label>
+      <input type="file" name="resume" accept="application/pdf" class="border_n" required>
+      <label for="textarea">Job Description</label>
+      <textarea name="job_description" rows="5" placeholder="Paste Job Description here..." class="border_n" required></textarea>
+      <!-- From Uiverse.io by njesenberger --> 
+
+<button type="submit" class="button">
+  <div class="button-top">Analyze Resume</div>
+  <div class="button-bottom"></div>
+  <div class="button-base"></div>
+</button>
+    </form>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Horizontal Fullscreen Result -->
+  <div class="result-screen" id="resultScreen">
+    <div class="result-header">
+      <h2>📊 Analysis Result</h2>
+      <button class="close-btn" id="closeBtn">Close ✖</button>
+    </div>
+    <div class="result-content" id="resultContent"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("resumeForm");
+    const resultScreen = document.getElementById("resultScreen");
+    const resultContent = document.getElementById("resultContent");
+    const closeBtn = document.getElementById("closeBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      resultScreen.classList.add("active");
+      resultContent.innerHTML = "<div class='highlight'>⏳ Analyzing resume, please wait...</div>";
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          resultContent.innerHTML = `<div class='highlight' style="color:red;">❌ ${data.error}</div>`;
+        } else {
+          // Clean up **bold** markers
+          let cleanText = data.analysis_result.replace(/\*\*/g, "");
+
+          // Split into lines
+          const lines = cleanText.split("\n").filter(line => line.trim() !== "");
+          let formattedText = "";
+
+          lines.forEach(line => {
+            if (line.toLowerCase().startsWith("summary")) {
+              formattedText += `<div class="section-heading">Summary</div>`;
+            } else if (line.toLowerCase().startsWith("suggestions")) {
+              formattedText += `<div class="section-heading">Suggestions for Improvement</div>`;
+            } else if (line.toLowerCase().startsWith("missing")) {
+              formattedText += `<div class="section-heading">Missing Skills & Experiences</div>`;
+            } else if (line.toLowerCase().includes("match score")) {
+              formattedText += `<div class="match-score">${line}</div>`;
+            } else {
+              formattedText += `<div class="section-text">${line}</div>`;
+            }
+          });
+
+          resultContent.innerHTML = formattedText;
+        }
+      } catch (err) {
+        resultContent.innerHTML = `<div class='highlight' style="color:red;">⚠️ Something went wrong!</div>`;
+      }
+    });
+
+    closeBtn.addEventListener("click", () => {
+      resultScreen.classList.remove("active");
+    });
+  </script>
+</body>
+</html>
